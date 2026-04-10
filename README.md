@@ -83,3 +83,119 @@ Se cargaron exitosamente 14 registros en airlines, 322 registros en airports y 5
 Ejecución del script Bronze
 ![GLUE_BRONZE](docs/glue_bronze.png)
 Glue Catalog — base de datos
+
+### 2.3 Capa Silver
+
+La capa Silver transforma los datos de Bronze a formato Parquet + Snappy y genera tres tablas analíticas agregadas:
+
+`flights_daily`
+`flights_monthly`
+`flights_by_airport`
+`flights_daily`
+
+Agrega por día (`YEAR, MONTH, DAY`) y calcula:
+
+`total_flights`
+`total_delayed`
+`total_cancelled`
+`avg_departure_delay`
+`avg_arrival_delay`
+
+Además, se particionó por `MONTH`, con 12 particiones.
+
+`flights_monthly`
+
+Agrega por mes y aerolínea (`MONTH, AIRLINE`) y calcula:
+
+`total_flights`
+`total_delayed`
+`total_cancelled`
+`avg_arrival_delay`
+`on_time_pct`
+`flights_by_airport`
+
+Agrega por aeropuerto de origen (`ORIGIN_AIRPORT`) y calcula:
+
+`total_departures`
+`total_delayed`
+`total_cancelled`
+`avg_departure_delay`
+`pct_weather_delay`
+
+- Evidencia Silver
+
+![EJ_SILVER](docs/silver.png)
+Ejecución del script Silver
+![GLUE_SILVER](docs/glue_silver.png)
+Glue Catalog — base de datos flights_silver
+
+### 2.4 Capa Gold
+
+La capa Gold se construyó con un CTAS en Athena para crear una tabla analítica desnormalizada llamada `flights_gold.vuelos_analitica`, uniendo vuelos con catálogos de aerolíneas y aeropuertos.
+
+Esta tabla incluye variables como:
+
+fecha del vuelo
+aeropuerto de origen y nombre del aeropuerto
+ciudad y estado de origen
+aeropuerto de destino y nombre del aeropuerto
+nombre de aerolínea
+retrasos
+cancelaciones
+distancia
+componentes específicos de retraso
+
+- Evidencia Gold
+
+![EJ_GOLD](docs/gold.png)
+Ejecución del script Gold
+![GLUE_GOLD](docs/glue_gold.png)
+Glue Catalog — tabla vuelos_analitica
+![ATHENA_GOLD](docs/athena_gold.png)
+Validación en Athena con SELECT ... LIMIT 5
+
+
+## 3. PostgreSQL y modelo relacional
+### 3.1 CloudFormation
+
+Se provisionó una instancia PostgreSQL con Read Replica usando CloudFormation, siguiendo el patrón visto en clase. La base de datos se llamó flights y se usaron dos endpoints:
+
+`RdsEndpoint`: instancia primaria para escritura
+`RdsReplicaEndpoint`: réplica para lectura analítica
+
+![CLOUD_FORMATION](docs/cloud_formation_endpoints.png)
+
+### 3.2 ERD
+
+Se diseñó un diagrama entidad-relación con tres entidades:
+
+`airlines`
+`airports`
+`flights`
+
+La tabla `flights` contiene dos claves foráneas hacia `airports`: una para el aeropuerto de origen y otra para el de destino.
+
+![ERD](docs/erd-flights.png)
+
+### 3.3 Tablas en PostgreSQL
+
+El esquema relacional fue implementado con SQLAlchemy 2.0 en `db/models.py`, respetando llaves primarias, foráneas y relaciones.
+
+
+### 3.4 Carga de datos
+
+La carga se hizo con bulk insert usando session.execute(insert(Model), records), respetando el orden de dependencias:
+
+`airlines`
+`airports`
+`flights`
+
+Para flights se cargaron los primeros 500,000 registros,
+
+![POSTGRESQL500](docs/PostgreSQL_500K.png)
+
+### 3.5 Conexión con DBeaver
+
+Se configuró una conexión a la Read Replica en DBeaver para ejecutar las consultas analíticas solicitadas.
+
+![DBeaver_Postgresql](docs/DBeaver_POSTGRESQL.png)
