@@ -322,7 +322,11 @@ Se calcularon intervalos de confianza al 90% y se comparó el desempeño con MAE
 
 Los resultados fueron:
 
-###  -----
+| Modelo     | MAE     |
+|------------|---------:|
+| AutoARIMA  | 9512.33 |
+| AutoETS    | 9530.91 |
+| AutoTheta  | 18735.26 |
 
 `AutoARIMA` fue el modelo con mejor desempeño, aunque `AutoETS` mostró un desempeño muy cercano. `AutoTheta` presentó un error claramente mayor.
 
