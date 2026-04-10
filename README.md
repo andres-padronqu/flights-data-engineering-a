@@ -199,3 +199,64 @@ Para flights se cargaron los primeros 500,000 registros,
 Se configuró una conexión a la Read Replica en DBeaver para ejecutar las consultas analíticas solicitadas.
 
 ![DBeaver_Postgresql](docs/DBeaver_POSTGRESQL.png)
+
+## 4. Consultas SQL en DBeaver
+
+Se resolvieron las preguntas P1–P5 y W1-W3 en DBeaver. (W2 en Athena). Para probar que todo funcionará se ejecutó una prueba.
+
+![1FLIGHTSDB](docs/1_FLIGHTS_DB.png)
+
+
+### P1. Rutas con mayor número de vuelos
+
+Se identificaron las 10 rutas origen-destino con mayor número de vuelos. Las más frecuentes fueron `LAX` → `JFK` y `JFK` → `LAX`, seguidas por conexiones intensivas entre hubs como `SFO` → `LAX` y `LAX` → `SFO`.
+
+![P1](docs/P1.png)
+
+### P2. Aerolíneas con mayor porcentaje de cancelación
+
+Se calcularon los porcentajes de cancelación por aerolínea. La aerolínea `MQ` presentó el mayor porcentaje de vuelos cancelados, seguida por `B6` y `EV`.
+
+![P2](docs/P2.png)
+
+### P3. Cancelaciones por causa
+
+La causa `B` fue la más frecuente, seguida por `A` y `C`. La categoría `D` tuvo incidencia prácticamente nula.
+
+![P3](docs/P3.png)
+
+### P4. Retraso promedio de salida por mes
+
+Dado que en PostgreSQL solo se cargaron 500,000 filas, esta consulta reflejó únicamente enero completo y parte de febrero. Por ello, esta visualización es parcial y no representa todo 2015.
+
+![P4](docs/P4.png)
+
+### P5. Aeropuertos con más minutos de retraso por clima
+
+ORD destacó claramente como el aeropuerto con mayor total de minutos de retraso atribuibles al clima, muy por encima del resto.
+
+![P5](docs/P5.png)
+
+### W1. Vuelo con mayor retraso de llegada por aerolínea
+
+Se utilizó `RANK()` particionando por aerolínea y ordenando por A`RRIVAL_DELAY DESC NULLS LAST`.
+
+![W1](docs/W1.png)
+
+### W2. Variación mes a mes
+
+Esta consulta se respondió en Athena sobre `flights_silver.flights_monthly`, porque la muestra en PostgreSQL era insuficiente para cubrir todo el año.
+
+![W2_1](docs/W2_1.png)
+![W2_2](docs/W2_2.png)
+
+### W3. Primeros vuelos en LAX el 2015-01-01
+
+Se usó `ROW_NUMBER()` sobre (`year, month, day, origin_airport`) y ordenamiento por `SCHEDULED_DEPARTURE`.
+
+![W3](docs/W3.png)
+
+
+## 5. Notebook analítico
+
+El notebook flights_analytics.ipynb replica las consultas SQL usando `pandas`, `SQLAlchemy`, `awswrangler` y visualizaciones en `matplotlib`. Además, incluye el análisis estadístico y el pronóstico de series de tiempo pedidos en la tarea.
