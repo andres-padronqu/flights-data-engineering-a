@@ -229,7 +229,7 @@ La causa `B` fue la más frecuente, seguida por `A` y `C`. La categoría `D` tuv
 
 Dado que en PostgreSQL solo se cargaron 500,000 filas, esta consulta reflejó únicamente enero completo y parte de febrero. Por ello, esta visualización es parcial y no representa todo 2015.
 
-![P4](docs/P4.png)
+![P4](docs/P4_SOLO2MES.png)
 
 ### P5. Aeropuertos con más minutos de retraso por clima
 
@@ -260,3 +260,105 @@ Se usó `ROW_NUMBER()` sobre (`year, month, day, origin_airport`) y ordenamiento
 ## 5. Notebook analítico
 
 El notebook flights_analytics.ipynb replica las consultas SQL usando `pandas`, `SQLAlchemy`, `awswrangler` y visualizaciones en `matplotlib`. Además, incluye el análisis estadístico y el pronóstico de series de tiempo pedidos en la tarea.
+
+## 6. Análisis estadístico
+### 6.1 Regresión lineal: factores que explican arrival_delay
+
+Se ajustó un modelo OLS con `statsmodels`, tomando como variable objetivo el retraso de llegada (`arrival_delay`) y como covariables:
+
+`departure_delay`
+`distance`
+`air_system_delay`
+`airline_delay`
+`weather_delay`
+`late_aircraft_delay`
+`security_delay`
+
+Los resultados principales del modelo fueron:
+
+- R² = 0.9422
+- RMSE = 9.4828 minutos
+
+Esto implica que el modelo explica aproximadamente el 94.22% de la variación observada en el retraso de llegada, con un error promedio de predicción de alrededor de 9.48 minutos.
+
+En términos de coeficientes, air_system_delay fue la variable con mayor peso positivo, seguida por `security_delay`, `weather_delay`, `late_aircraft_delay` y `airline_delay`. La variable distance mostró un efecto pequeño y negativo.
+
+La gráfica de valores predichos contra valores reales mostró una alineación fuerte alrededor de la diagonal, lo que sugiere un buen ajuste global. Sin embargo, el `Q-Q plot` de residuos reveló desviaciones claras respecto a la normalidad, especialmente en las colas, y el summary reportó un número de condición elevado, consistente con multicolinealidad. Esto era esperado, ya que varios componentes del retraso suman aproximadamente el retraso total de llegada.
+
+En conjunto, el modelo es muy explicativo, pero los diagnósticos sugieren que los supuestos clásicos de normalidad y ausencia de multicolinealidad no se cumplen de manera estricta.
+
+## 7. Pronóstico de series de tiempo
+### 7.1 Construcción de la serie
+
+Se utilizó la tabla flights_silver.flights_monthly, agregando el total de vuelos por mes para 2015. Posteriormente, se construyó un DataFrame en el formato requerido por StatsForecast:
+
+`unique_id`
+`ds`
+`y`
+
+Se dividió la serie en:
+
+Train: enero a septiembre de 2015
+Test: octubre a diciembre de 2015
+
+## 7.2 Modelos ajustados
+
+Se compararon tres modelos automáticos:
+
+`AutoETS`
+`AutoARIMA`
+`AutoTheta`
+
+Con solo 9 observaciones en entrenamiento, los modelos seleccionaron especificaciones no estacionales, lo cual es coherente con la restricción de datos.
+
+## 7.3 Evaluación y resultados
+
+El pronóstico se generó a un horizonte de 9 pasos:
+
+3 pasos para el test set
+6 pasos hacia adelante (enero-junio de 2016)
+
+Se calcularon intervalos de confianza al 90% y se comparó el desempeño con MAE en el conjunto de prueba.
+
+Los resultados fueron:
+
+###  -----
+
+`AutoARIMA` fue el modelo con mejor desempeño, aunque `AutoETS` mostró un desempeño muy cercano. `AutoTheta` presentó un error claramente mayor.
+
+Dado que solo se dispone de un año de datos, los intervalos de confianza sugieren una incertidumbre considerable en la extrapolación hacia 2016. En consecuencia, estos pronósticos deben interpretarse como aproximaciones exploratorias más que como estimaciones altamente confiables.
+
+## 8. Cómo ejecutar el pipeline
+
+### Descarga de datos
+
+```bash
+aws s3 cp s3://itam-analytics-dante/flights-hwk/flights.zip . --no-sign-request
+unzip flights.zip -d data/
+```
+
+### ETL
+```bash
+python etl/bronze.py --bucket <itam-analytics-andres> --data-dir data/
+python etl/silver.py --bucket <itam-analytics-andres>
+python etl/gold.py --bucket <itam-analytics-andres>
+```
+
+### PostgreSQL
+
+El modelo y la carga se encuentran en:
+
+`db/models.py`
+`db/load_postgres.py`
+
+### Notebook
+
+El análisis completo se encuentra en:
+
+`flights_analytics.ipynb`
+
+## 9. Notas finales
+- Los archivos crudos no se incluyen en el repositorio.
+- La carpeta `data/` y archivos `.zip` están excluidos con `.gitignore`.
+- Los scripts `ETL` fueron diseñados para ser reutilizables, parametrizados e idempotentes.
+- La réplica de lectura se usó para consultas analíticas y el endpoint primario para escritura, siguiendo una práctica realista de arquitectura de datos.
