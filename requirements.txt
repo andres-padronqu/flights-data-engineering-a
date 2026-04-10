@@ -1,0 +1,13 @@
+awswrangler
+boto3
+pandas
+pyarrow
+sqlalchemy
+psycopg2-binary
+jupyter
+matplotlib
+plotly
+statsmodels
+scikit-learn
+statsforecast
+great-tables
