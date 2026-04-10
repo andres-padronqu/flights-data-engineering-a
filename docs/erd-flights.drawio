@@ -1,0 +1,45 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="mzCP4syOV4RyCGE3G4FQ">
+    <mxGraphModel dx="1132" dy="701" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="phWJ6a9QbO7exccidCn9-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" value="airlines&lt;br&gt;-----------&lt;br&gt;PK iata_code : string&lt;br&gt;airline : string" vertex="1">
+          <mxGeometry height="60" width="130" x="320" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="phWJ6a9QbO7exccidCn9-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" value="airports (origin)&lt;br&gt;-----------&lt;br&gt;PK iata_code : string&lt;br&gt;airport : string&lt;br&gt;city : string&lt;br&gt;state : string&lt;br&gt;country : string&lt;br&gt;latitude : float&lt;br&gt;longitude : float" vertex="1">
+          <mxGeometry height="140" width="150" x="160" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="phWJ6a9QbO7exccidCn9-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;" value="flights&lt;br&gt;-----------&lt;br&gt;PK flight_id : int&lt;br&gt;&lt;br&gt;FK airline → airlines.iata_code&lt;br&gt;FK origin_airport → airports.iata_code&lt;br&gt;FK destination_airport → airports.iata_code&lt;br&gt;&lt;br&gt;departure_delay : float&lt;br&gt;arrival_delay : float&lt;br&gt;distance : float&lt;br&gt;cancelled : int&lt;div&gt;year : int&lt;br&gt;month : int&lt;br&gt;day : int&lt;/div&gt;" vertex="1">
+          <mxGeometry height="260" width="195" x="285" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="phWJ6a9QbO7exccidCn9-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" value="airports (destination)&lt;br&gt;-----------&lt;br&gt;PK iata_code : string&lt;br&gt;airport : string&lt;br&gt;city : string&lt;br&gt;state : string&lt;br&gt;country : string&lt;br&gt;latitude : float&lt;br&gt;longitude : float" vertex="1">
+          <mxGeometry height="140" width="150" x="460" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="phWJ6a9QbO7exccidCn9-5" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="388" y="168" />
+            </Array>
+            <mxPoint x="388" y="168" as="sourcePoint" />
+            <mxPoint x="388" y="216" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="phWJ6a9QbO7exccidCn9-7" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="phWJ6a9QbO7exccidCn9-2" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points" />
+            <mxPoint x="300" y="480" as="sourcePoint" />
+            <mxPoint x="249.95000000000005" y="530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="phWJ6a9QbO7exccidCn9-8" edge="1" parent="1" source="phWJ6a9QbO7exccidCn9-3" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=1;exitDx=0;exitDy=0;" target="phWJ6a9QbO7exccidCn9-4" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points" />
+            <mxPoint x="490" y="430" as="sourcePoint" />
+            <mxPoint x="520" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
